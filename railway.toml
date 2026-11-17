@@ -1,0 +1,7 @@
+[build]
+builder = "DOCKERFILE"
+
+[deploy]
+preDeployCommand = ["sh -ec 'alembic upgrade head && python -m inventory.seed'"]
+healthcheckPath = "/ready"
+healthcheckTimeout = 60

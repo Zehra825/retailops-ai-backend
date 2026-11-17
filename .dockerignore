@@ -1,0 +1,8 @@
+*
+!requirements.txt
+!inventory/
+!inventory/**
+!migrations/
+!migrations/**
+!alembic.ini
+**/__pycache__/
