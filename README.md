@@ -79,7 +79,24 @@ docker exec retailops-pg createdb -U inventory inventory_test
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-## Publish to GitHub and deploy on Railway
+## Deploy with Neon and Render Free
+
+The repository includes `render.yaml` for a Render Free Python web service. It keeps the existing API contract and requires no Railway database.
+
+1. In Neon project `winter-voice-64193055`, select the `retailops-development` branch and database `neondb` for portfolio development.
+2. Copy its pooled connection URL into Render's `DATABASE_URL`. Copy its direct URL (hostname without `-pooler`) into `DATABASE_URL_UNPOOLED`. Keep `sslmode=require` and any channel-binding settings. Never commit these values.
+3. In Render, choose **New → Blueprint**, connect this repository, and select the branch containing `render.yaml`. Confirm the service plan is **Free** before creating it. Render generates `API_KEY`; keep it private.
+4. The start command runs Alembic, seeds missing demo products, and starts FastAPI. Migrations use `DATABASE_URL_UNPOOLED`; application queries use `DATABASE_URL`.
+5. Check `https://YOUR-RENDER-HOST/ready` for `{"status":"ready"}`. Then request `/products/HP-001` with `X-API-Key` set to the generated key. Expect stock 8 and price `299.00` on a freshly seeded database.
+6. Use the Render hostname and generated API key in the n8n instructions below.
+
+Render Free services sleep after inactivity, so the first request can take longer. The health check uses `/health` to avoid a database query on every platform probe; `/ready` remains the explicit database check. Free services run migrations at startup because Render pre-deploy commands require a paid service. A migration failure prevents startup. Deploy one instance; review migrations before releases.
+
+For database tests, set `TEST_DATABASE_URL` to a **direct** connection on an isolated development database. Tests create and remove temporary schemas. Never point it at your production database. A configured `DATABASE_URL_UNPOOLED` is overridden with the isolated test schema during tests.
+
+References: [Render Blueprints](https://render.com/docs/blueprint-spec), [Render Free services](https://render.com/docs/free).
+
+## Alternative: deploy on Railway
 
 Install Git, GitHub CLI (`gh`), and Railway CLI (`railway`). From this local Git checkout, sign in to the GitHub account that should own the private repository. If you copied the files without Git history, run `git init -b main`, `git add .`, and `git commit -m "Build inventory API"` first.
 

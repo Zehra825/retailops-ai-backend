@@ -25,6 +25,7 @@ def db(monkeypatch):
     isolated_url = url.update_query_dict({"options": f"-csearch_path={schema}"})
     engine = database_engine(isolated_url)
     monkeypatch.setenv("DATABASE_URL", isolated_url.render_as_string(hide_password=False))
+    monkeypatch.setenv("DATABASE_URL_UNPOOLED", isolated_url.render_as_string(hide_password=False))
     monkeypatch.setenv("API_KEY", HEADERS["X-API-Key"])
     with admin.begin() as conn:
         conn.exec_driver_sql(f"CREATE SCHEMA {schema}")
