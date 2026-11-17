@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: retailops-ai-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m alembic upgrade head && python -m inventory.seed && exec python -m uvicorn inventory.api:create_app --factory --host 0.0.0.0 --port $PORT --no-access-log
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: API_KEY
+        generateValue: true
